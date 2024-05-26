@@ -29,12 +29,12 @@ export class Game {
 
     private initGame() {
         this.player1.send(JSON.stringify({
-            type: MESSAGES.INIT_GAME,
+            type: MESSAGES.GAME_START,
             gameID: this.gameID,
             color: "white"
         }))
         this.player2.send(JSON.stringify({
-            type: MESSAGES.INIT_GAME,
+            type: MESSAGES.GAME_START,
             gameID: this.gameID,
             color: "black"
         }))
@@ -63,7 +63,6 @@ export class Game {
         // make move
         try {
             this.board.move(move)
-            this.moveCount++
         } catch(err) {
             console.log(err)
             this.player1.send(JSON.stringify({
@@ -105,15 +104,22 @@ export class Game {
             return
         }
         // send move
-        this.player1.send(JSON.stringify({
+        if(this.moveCount % 2 === 0) {
+            console.log("player 1 move");
+            this.sendMove(this.player2, move)
+        } else {
+            console.log("player 2 move");
+            this.sendMove(this.player1, move)
+        }
+        this.moveCount++
+       
+    }
+
+    private sendMove(player: WebSocket, move: MOVE) {
+        player.send(JSON.stringify({
             type: MESSAGES.GAME_MOVE,
             gameID: this.gameID,
-            move: move
-        }))
-        this.player2.send(JSON.stringify({
-            type: MESSAGES.GAME_MOVE,
-            gameID: this.gameID,
-            move: move
+            move
         }))
     }
 }
